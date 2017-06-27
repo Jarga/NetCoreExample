@@ -9,7 +9,7 @@ namespace NetCoreExample.Controllers
 {
     public class HomeController : Controller
     {
-        public static ConcurrentBag<Guid> ValidationSource = new ConcurrentBag<Guid>();
+        public static ConcurrentDictionary<Guid, object> ValidationSource = new ConcurrentDictionary<Guid, object>();
 
         public IActionResult Index()
         {
@@ -35,18 +35,26 @@ namespace NetCoreExample.Controllers
             return View();
         }
 
-        public IActionResult TestCreate()
-        {
-            var guid = Guid.NewGuid();
-            ValidationSource.Add(guid);
+        public IActionResult Get(Guid guid)
+        {   var data = ValidationSource?[guid];
+            
+            if(data == null) return NotFound();
 
-            return Json(new { Guid = guid });
+            return Json(data);
+        }
+
+        [HttpPut]
+        public IActionResult Put(Guid guid, object data)
+        {
+            ValidationSource.AddOrUpdate(guid, data, (key, value) => data );
+
+            return CreatedAtAction("Get", new { guid = guid });
         }
 
         [HttpPost]
-        public IActionResult TestValidate(Guid guid)
+        public IActionResult Exists(Guid guid)
         {
-            return Json(new { exists = ValidationSource.Contains(guid) });
+            return Json(new { exists = ValidationSource.ContainsKey(guid) });
         }
     }
 }

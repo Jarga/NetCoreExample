@@ -1,5 +1,5 @@
 FROM microsoft/aspnetcore
 
 WORKDIR /app
-COPY ./publish .
+COPY ./src/app/publish .
 ENTRYPOINT ["dotnet", "NetCoreExample.dll"]
