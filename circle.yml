@@ -12,7 +12,7 @@ jobs:
           command: 'dotnet restore ./src/app/'
       - run:
           name: Build Artifacts
-          command: 'dotnet publish ./src/app/ -o ./src/app/publish --configuration Release'
+          command: 'dotnet publish ./src/app/ -o ./publish --configuration Release'
       - run:
           name: Install Docker client
           command: |
