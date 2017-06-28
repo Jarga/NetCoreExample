@@ -9,7 +9,6 @@ jobs:
       - setup_remote_docker
       - run:
           name: Restore Packages
-          command: 'dotnet restore ./src/shared/'
           command: 'dotnet restore ./src/app/'
           command: 'dotnet restore ./src/worker/'
       - run:
