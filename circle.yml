@@ -8,12 +8,16 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Restore Packages
+          name: Restore App Packages
           command: 'dotnet restore ./src/app/'
+      - run:
+          name: Restore Worker Packages
           command: 'dotnet restore ./src/worker/'
       - run:
-          name: Build Artifacts
+          name: Build App Artifacts
           command: 'dotnet publish ./src/app/ -o ./publish --configuration Release'
+      - run:
+          name: Build Worker Artifacts
           command: 'dotnet publish ./src/worker/ -o ./publish --configuration Release'
       - run:
           name: Install Docker client
