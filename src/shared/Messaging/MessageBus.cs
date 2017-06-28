@@ -25,16 +25,15 @@ namespace Shared.Messaging
 
         public void Publish(IMessage message, string exchangeOrQueue, string key = null)
         {
-            if (!string.IsNullOrWhiteSpace(exchangeOrQueue))
-            {
-                if (string.IsNullOrWhiteSpace(key))
-                {
-                    channel.QueueDeclare(exchangeOrQueue, true, false, false);
-                }
-                else
-                {
-                    channel.ExchangeDeclare(exchangeOrQueue, "topic", true);
-                }
+            if(string.IsNullOrWhiteSpace(exchangeOrQueue)) return;
+            
+            var hasKey = !string.IsNullOrWhiteSpace(key);
+            if (!hasKey) {
+                channel.QueueDeclare(exchangeOrQueue, true, false, false);
+                channel.ExchangeDeclare(exchangeOrQueue + "Exchange", "topic", true);
+                channel.QueueBind(exchangeOrQueue, exchangeOrQueue + "Exchange", "default");
+            } else {
+                channel.ExchangeDeclare(exchangeOrQueue, "topic", true);
             }
 
             var json = JsonConvert.SerializeObject(message);
@@ -47,7 +46,7 @@ namespace Shared.Messaging
 
             lock (locker)
             {
-                channel.BasicPublish(exchangeOrQueue, key, props, body);
+                channel.BasicPublish(exchangeOrQueue + (hasKey ? "" : "Exchange"), hasKey ? key : "default", props, body);
                 channel.WaitForConfirmsOrDie();
             }
         }

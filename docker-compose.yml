@@ -1,0 +1,46 @@
+version: '3.1'
+services:
+    mongo:
+        ports:
+            - "27017:27017"
+        image: "mongo:3"
+        restart: on-failure
+        healthcheck:
+            test: ["CMD", "nc", "-zvv", "localhost", "27017"]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+    rabbitmq:
+        image: rabbitmq:3.6.1-management
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:15672"]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+        restart: on-failure
+    worker:
+        image: example-worker
+        build: ./src/worker
+        depends_on:
+            - mongo
+            - rabbitmq
+        restart: on-failure
+        environment:
+            - AmqpUri=amqp://guest:guest@rabbitmq:5672/
+            - MongoUri=mongodb://mongo:27017/example
+            - AppUrl=http://app:5000
+    app:
+        image: example-app
+        build: ./src/app
+        depends_on:
+            - mongo
+            - rabbitmq
+        restart: on-failure
+        ports:
+            - "5000:80"
+        environment:
+            - AmqpUri=amqp://guest:guest@rabbitmq:5672/
+            - MongoUri=mongodb://mongo:27017/example

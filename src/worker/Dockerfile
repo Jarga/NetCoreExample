@@ -1,4 +1,4 @@
-FROM microsoft/aspnetcore
+FROM microsoft/dotnet:runtime
 
 WORKDIR /app
 COPY ./publish .
