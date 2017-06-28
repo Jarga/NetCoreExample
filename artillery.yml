@@ -1,20 +1,19 @@
 config:
-  target: "http://13.82.236.162"
+  target: "http://localhost:5000"
   phases:
     -
       duration: 60
-      arrivalRate: 10000
+      arrivalRate: 20
 scenarios:
   -
-    name: "Test and Validate"
+    name: "Create and Get"
     flow:
       -
-        get:
-          url: "/Home/TestCreate"
+        post:
+          url: "/api/entities/create"
           capture:
             json: "$.guid"
             as: "guid"
       -
-        post:
-          url: "/Home/TestValidate"
-          body: "guid={{ guid }}"
+        get:
+          url: "/api/entities/{{ guid }}"
