@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace worker
+namespace Shared.Messaging
 {
     public class MessageBus : IDisposable
     {
@@ -43,7 +43,7 @@ namespace worker
             var props = channel.CreateBasicProperties();
             props.ContentType = "application/json";
             props.DeliveryMode = 2; //persistent
-            props.CorrelationId = message.Id;
+            props.CorrelationId = message.Id.ToString();
 
             lock (locker)
             {
@@ -91,10 +91,5 @@ namespace worker
         }
 
         public void Dispose() => Dispose(true);
-    }
-    
-    public interface IMessage
-    {
-        string Id { get; }
     }
 }
