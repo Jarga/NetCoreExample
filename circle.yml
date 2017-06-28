@@ -9,10 +9,13 @@ jobs:
       - setup_remote_docker
       - run:
           name: Restore Packages
+          command: 'dotnet restore ./src/shared/'
           command: 'dotnet restore ./src/app/'
+          command: 'dotnet restore ./src/worker/'
       - run:
           name: Build Artifacts
           command: 'dotnet publish ./src/app/ -o ./publish --configuration Release'
+          command: 'dotnet publish ./src/worker/ -o ./publish --configuration Release'
       - run:
           name: Install Docker client
           command: |
