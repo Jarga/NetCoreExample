@@ -6,26 +6,133 @@
 
 class: center, middle
 
-# The .NET Core Presentation
-### (The presentation of the presentation)
+# .NET Core and more
 
 ---
+
+class: center
 
 # Agenda
 
+.content[
 1. What and Why .NET Core
 2. Future BD3
 3. Creating your first app
-4. Actually creating your first app
-5. .NET Standard and You
-6. Sharing code
-7. Time Permitting:
-    - Docker
-    - Testing
+4. .NET Standard and You
+5. Sharing code
+6. Time Permitting:
+    - Docker / Docker Swarm
+    - CircleCI & Terraform
+]
 
 ---
 
-# Introduction
+class: center
+
+# .NET Core Introduction 
+
+.content[
+- Open Source
+- Cross-Platform
+- Comand-line tooling
+- Flexible deployment
+]
+
+---
+
+class: center
+
+# BD3 Business Component
+
+### (why we want to use it)
+
+.content[
+* Goals
+    - Independently deployable
+    - Isolate change and faults
+    - Use right tool for the job
+    - Scalable units
+    - Increase developer autonomy
+]
+
+---
+
+class: center, middle
+
+![Business Component](images/business_component.png)
+
+---
+
+class: center
+
+# Building Your First App
+
+.content[
+* Three main command you need to know
+    - dotnet new
+    - dotnet restore
+    - dotnet run
+
+* Additional Commands
+    - dotnet add
+    - dotnet publish
+    - dotnet build
+    - dotnet test
+]
+
+---
+
+class: center, middle
+
+# Demo
+
+---
+
+class: center
+
+# .Net Standard
+
+.content[
+* Often a point of confusion
+* API Specification available on all .NET runtimes
+* e.g. .NET Standard is the interface, .Net Core is the implementation
+* Best described at: [.Net Standard Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
+]
+
+---
+
+class: center, middle
+
+# More Demo
+
+---
+
+class: center
+
+# Docker
+
+.content[
+* Software Container Platform
+* Benefits
+    - Isolation
+    - Rapid Development
+    - Standardization
+    - Compatability
+]
+
+---
+
+class: center
+
+# Docker Swarm
+
+.content[
+* Cluster Orchestration
+* Some Benefits
+    - Network management
+    - Built in scaling
+    - Declarative service model
+]
 
 </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

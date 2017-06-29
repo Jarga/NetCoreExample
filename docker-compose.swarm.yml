@@ -1,0 +1,34 @@
+version: '3.1'
+services:
+    mongo:
+        ports:
+            - "27017:27017"
+        image: "mongo:3"
+        restart: on-failure
+    rabbitmq:
+        image: rabbitmq:3.6.1-management
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        restart: on-failure
+    worker:
+        image: jarga/netcoreworkerexample
+        depends_on:
+            - mongo
+            - rabbitmq
+        restart: on-failure
+        environment:
+            - AmqpUri=amqp://guest:guest@rabbitmq:5672/
+            - MongoUri=mongodb://mongo:27017/example
+            - AppUrl=http://app:5000
+    app:
+        image: jarga/netcorewebexample
+        depends_on:
+            - mongo
+            - rabbitmq
+        restart: on-failure
+        ports:
+            - "5000:80"
+        environment:
+            - AmqpUri=amqp://guest:guest@rabbitmq:5672/
+            - MongoUri=mongodb://mongo:27017/example

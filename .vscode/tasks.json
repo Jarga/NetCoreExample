@@ -1,15 +1,63 @@
 {
-    "version": "0.1.0",
-    "command": "dotnet",
-    "isShellCommand": true,
-    "args": [],
+    "version": "2.0.0",
     "tasks": [
         {
-            "taskName": "build",
-            "args": [
-                "${workspaceRoot}/src/app/NetCoreExample.csproj"
-            ],
-            "isBuildCommand": true,
+            "taskName": "Restore App",
+            "command": "dotnet",
+            "args": ["restore", "${workspaceRoot}/src/app"]
+        },
+        {
+            "taskName": "Restore Worker",
+            "command": "dotnet",
+            "args": ["restore", "${workspaceRoot}/src/worker"]
+        },
+        {
+            "taskName": "Build App",
+            "dependsOn": ["Restore App"],
+            "command": "dotnet",
+            "args": ["build", "${workspaceRoot}/src/app"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "Build Worker",
+            "dependsOn": ["Restore Worker"],
+            "command": "dotnet",
+            "args": ["build", "${workspaceRoot}/src/worker"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "Full Build",
+            "dependsOn": ["Build App", "Build Worker"],
+            "isBuildCommand": true
+        },
+        {
+            "taskName": "Publish App",
+            "command": "dotnet",
+            "args": ["publish", "${workspaceRoot}/src/app/", "-o", "./publish", "--configuration", "Release" ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "Publish Worker",
+            "command": "dotnet",
+            "args": ["publish", "${workspaceRoot}/src/worker/", "-o", "./publish", "--configuration", "Release" ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "Full Publish",
+            "dependsOn": ["Publish App", "Publish Worker"]
+        },
+        {
+            "taskName": "Compose Up",
+            "dependsOn": ["Full Publish"],
+            "command": "docker-compose",
+            "args": ["up", "-d", "--build", "--remove-orphans"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "Debug PreLaunch",
+            "dependsOn": ["Full Build"],
+            "command": "docker-compose",
+            "args": ["-f", "${workspaceRoot}/docker-compose.debug.yml", "up", "-d", "--build", "--remove-orphans"],
             "problemMatcher": "$msCompile"
         }
     ]
