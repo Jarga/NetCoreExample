@@ -7,22 +7,21 @@ namespace Worker
 {
     class Program
     {
-        public static string AppUrl = Environment.GetEnvironmentVariable("AppUrl") ?? "http://localhost:5000/";
         public static string AMQPUrl = Environment.GetEnvironmentVariable("AmqpUri") ?? "amqp://guest:guest@localhost:5672/";
         public static string QueueName = Environment.GetEnvironmentVariable("QueueName") ?? "ExampleQueue";
         public static string MongoUri = Environment.GetEnvironmentVariable("MongoUri") ?? "mongodb://localhost:27017/example";
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Worker Initializing");
+            Console.WriteLine($"{DateTime.UtcNow.ToString()} Worker Initializing");
             var bus = new MessageBus(AMQPUrl);
             var repo = new EntityRepository(MongoUri);
-            Console.WriteLine("Worker Initialized");
+            Console.WriteLine($"{DateTime.UtcNow.ToString()} Worker Initialized");
             
-            Console.WriteLine("Worker Started");
+            Console.WriteLine($"{DateTime.UtcNow.ToString()} Worker Started");
             bus.Subscribe<CreateMessage>(QueueName, async model => {
                 
-                Console.WriteLine("Message Recieved");
+                Console.WriteLine($"{DateTime.UtcNow.ToString()} Message Recieved");
                 await repo.Upsert(new Entity {
                     Key = model.Id,
                     Data = new {
@@ -30,7 +29,7 @@ namespace Worker
                         Other = "Data"
                     }
                 });
-                Console.WriteLine("Message Handled");
+                Console.WriteLine($"{DateTime.UtcNow.ToString()} Message Handled");
             });
         }
     }

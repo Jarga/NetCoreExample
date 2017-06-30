@@ -50,15 +50,13 @@
             "taskName": "Compose Up",
             "dependsOn": ["Full Publish"],
             "command": "docker-compose",
-            "args": ["up", "-d", "--build", "--remove-orphans"],
-            "problemMatcher": "$msCompile"
+            "args": ["up", "-d", "--build", "--remove-orphans"]
         },
         {
             "taskName": "Debug PreLaunch",
             "dependsOn": ["Full Build"],
             "command": "docker-compose",
-            "args": ["-f", "${workspaceRoot}/docker-compose.debug.yml", "up", "-d", "--build", "--remove-orphans"],
-            "problemMatcher": "$msCompile"
+            "args": ["-f", "${workspaceRoot}/docker-compose.debug.yml", "up", "-d", "--remove-orphans"]
         }
     ]
 }
