@@ -1,0 +1,9 @@
+sftp -P 221 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no USER@LOADBALANCERDNS <<< $'put ./docker-compose.swarm.yml'
+
+ssh USER@LOADBALANCERDNS -p 221 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+
+docker stack deploy -c docker-compose.swarm.yml NETCOREEXAMPLE
+
+
+
+docker exec `docker ps | grep -i influx | awk '{print $1}'` influx -execute 'CREATE DATABASE cadvisor'

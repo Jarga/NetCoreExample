@@ -1,0 +1,4 @@
+az account set --subscription="SUBSCRIPTIONID"
+az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/SUBSCRIPTIONID"
+
+az login --service-principal -u http://azure-cli-2017-05-23-13-09-57 -p PASSWORD_GUID --tenant TENANT_GUID
