@@ -11,6 +11,8 @@ services:
                 condition: on-failure
     rabbitmq:
         image: rabbitmq:3.6.1-management
+        ports:
+            - "15672:15672"
         deploy:
             replicas: 1
             update_config:
