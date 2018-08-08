@@ -15,8 +15,12 @@ namespace Shared.Messaging
 
         public MessageBus(string messageBusConnectionString)
         {
-            var factory = new ConnectionFactory();
-            factory.SetUri(new Uri(messageBusConnectionString));
+            var factory = new ConnectionFactory
+            {
+                Uri = new Uri(messageBusConnectionString),
+                AutomaticRecoveryEnabled = true,
+                RequestedHeartbeat = 20
+            };
 
             connection = factory.CreateConnection();
             channel = connection.CreateModel();

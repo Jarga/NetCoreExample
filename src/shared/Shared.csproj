@@ -3,8 +3,8 @@
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="RabbitMQ.Client" Version="5.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.7.0" />
   </ItemGroup>
 </Project>

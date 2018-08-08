@@ -1,9 +1,9 @@
 config:
-  target: "http://smcadamslbdns.eastus.cloudapp.azure.com"
+  target: "http://localhost:5000"
   phases:
     -
       duration: 20
-      arrivalRate: 20
+      arrivalRate: 5
 scenarios:
   -
     name: "Create and Get"
