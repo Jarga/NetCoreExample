@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/NetCoreExample
     docker:
-      - image: microsoft/aspnetcore-build
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - checkout
       - setup_remote_docker

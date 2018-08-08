@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:runtime
+FROM microsoft/dotnet:2.1-runtime
 
 WORKDIR /app
 COPY ./publish .
