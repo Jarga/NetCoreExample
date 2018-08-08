@@ -3,30 +3,9 @@ jobs:
   build:
     working_directory: ~/NetCoreExample
     docker:
-      - image: microsoft/dotnet:2.1-sdk
+      - image: docker/dind
     steps:
       - checkout
-      - setup_remote_docker
-      - run:
-          name: Restore App Packages
-          command: 'dotnet restore ./src/app/'
-      - run:
-          name: Restore Worker Packages
-          command: 'dotnet restore ./src/worker/'
-      - run:
-          name: Build App Artifacts
-          command: 'dotnet publish ./src/app/ -o ./publish --configuration Release'
-      - run:
-          name: Build Worker Artifacts
-          command: 'dotnet publish ./src/worker/ -o ./publish --configuration Release'
-      - run:
-          name: Install Docker client
-          command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
       # build and push Docker image
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM

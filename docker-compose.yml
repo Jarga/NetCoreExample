@@ -13,7 +13,9 @@ services:
         restart: on-failure
     worker:
         image: example-worker
-        build: ./src/worker
+        build: 
+            context: ./src
+            dockerfile: ./worker/Dockerfile
         depends_on:
             - mongo
             - rabbitmq
@@ -24,7 +26,9 @@ services:
             - AppUrl=http://app:5000
     app:
         image: example-app
-        build: ./src/app
+        build: 
+            context: ./src
+            dockerfile: ./app/Dockerfile
         depends_on:
             - mongo
             - rabbitmq
