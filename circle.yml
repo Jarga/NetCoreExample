@@ -18,8 +18,8 @@ jobs:
       # build and push Docker image
         - run: |
             TAG=0.1.$CIRCLE_BUILD_NUM
-            docker build -t $DOCKER_USER/netcorewebexample:$TAG -t $DOCKER_USER/netcorewebexample:latest ./src/app/
-            docker build -t $DOCKER_USER/netcoreworkerexample:$TAG -t $DOCKER_USER/netcoreworkerexample:latest ./src/worker/
+            docker build -t $DOCKER_USER/netcorewebexample:$TAG -t $DOCKER_USER/netcorewebexample:latest -f ./src/app/Dockerfile ./src 
+            docker build -t $DOCKER_USER/netcoreworkerexample:$TAG -t $DOCKER_USER/netcoreworkerexample:latest -f ./src/worker/Dockerfile ./src 
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker push $DOCKER_USER/netcorewebexample:$TAG
             docker push $DOCKER_USER/netcoreworkerexample:$TAG
