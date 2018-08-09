@@ -23,7 +23,7 @@ services:
             restart_policy:
                 condition: on-failure
     worker:
-        image: jarga/netcoreworkerexample
+        image: "jarga/netcoreworkerexample:${TAG:-latest}"
         depends_on:
             - mongo
             - rabbitmq
@@ -38,7 +38,7 @@ services:
             restart_policy:
                 condition: on-failure
     app:
-        image: jarga/netcorewebexample
+        image: "jarga/netcorewebexample:${TAG:-latest}"
         depends_on:
             - mongo
             - rabbitmq

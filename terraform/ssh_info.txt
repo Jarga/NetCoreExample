@@ -2,7 +2,7 @@ sftp -P 221 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no smcadams
 
 ssh smcadams@smcadams.eastus.cloudapp.azure.com -p 221 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
 
-docker stack deploy -c docker-compose.swarm.yml NETCOREEXAMPLE
+export TAG=0.1.32 && docker stack deploy --resolve-image always -c docker-compose.swarm.yml NETCOREEXAMPLE
 
 smcadams@smcadams.eastus.cloudapp.azure.com
 
