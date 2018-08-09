@@ -1,7 +1,7 @@
 # Configure the Azure Providers
 
 terraform {
-  backend "azure" {
+  backend "azurerm" {
     storage_account_name = "smcadamsterraformstate"
     container_name       = "smcadamsterraformstate"
     key                  = "prod.terraform.tfstate"
@@ -131,10 +131,11 @@ resource "tls_private_key" "sshkey" {
 }
 
 resource "azurerm_storage_account" "stor" {
-  name                = "${var.dns_name}stor"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.rg.name}"
-  account_type        = "${var.storage_account_type}"
+  name                     = "${var.dns_name}stor"
+  location                 = "${var.location}"
+  resource_group_name      = "${azurerm_resource_group.rg.name}"
+  account_tier             = "${var.storage_machine_account_tier}"
+  account_replication_type = "${var.storage_machine_replication_type}"
 }
 
 resource "azurerm_storage_share" "share" {
@@ -209,8 +210,8 @@ resource "null_resource" "mount-shares" {
       "sudo apt-get -f -y install",
       "sudo apt-get -y upgrade",
       "sudo apt-get install cifs-utils",
-	  "sudo mkdir /mnt/swarmdata",
-	  "sudo mount -t cifs ${replace(azurerm_storage_share.share.url, "https:", "")} /mnt/swarmdata -o vers=3.0,user=${var.dns_name}stor,password=${azurerm_storage_account.stor.primary_access_key},dir_mode=0777,file_mode=0777,serverino"
+	  "sudo mkdir -p /mnt/swarmdata",
+	  "sudo mount -t cifs ${replace(azurerm_storage_share.share.url, "https:", "")} /mnt/swarmdata -o vers=3.0,user=${var.dns_name}stor,password=${azurerm_storage_account.stor.primary_access_key},dir_mode=0777,file_mode=0777,serverino || true"
     ]
   }
 }
@@ -254,12 +255,12 @@ resource "null_resource" "configure-add-swarm-managers" {
   }
   
   connection {
-      host = "${azurerm_public_ip.lbpip.fqdn}"
-      user = "${var.admin_username}"
-	  private_key = "${tls_private_key.sshkey.private_key_pem}"
-	  port = "2${count.index + 22}"
-      type = "ssh"
-      timeout = "4m"
+    host = "${azurerm_public_ip.lbpip.fqdn}"
+    user = "${var.admin_username}"
+    private_key = "${tls_private_key.sshkey.private_key_pem}"
+    port = "2${count.index + 22}"
+    type = "ssh"
+    timeout = "4m"
 	  agent = false
   }
 
@@ -327,7 +328,32 @@ resource "null_resource" "run-system-containers" {
     inline = [
       "sudo docker service create --name=viz --publish=8080:8080/tcp --constraint=node.role==manager --mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock dockersamples/visualizer || true",
 	    "sudo docker service create --name portainer --publish 9000:9000 --constraint 'node.role == manager' --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock portainer/portainer -H unix:///var/run/docker.sock || true",
-      "docker stack deploy -c /tmp/grafana-compose.yml monitor || true"
+      "sudo docker stack deploy -c /tmp/grafana-compose.yml monitor || true"
+    ]
+  }
+}
+
+resource "null_resource" "create-cadvisor-db" {
+  count = 3
+  depends_on = ["null_resource.run-system-containers"]
+  
+  triggers {
+    key = "${uuid()}"
+  }
+  
+  connection {
+      host = "${azurerm_public_ip.lbpip.fqdn}"
+      user = "${var.admin_username}"
+	    private_key = "${tls_private_key.sshkey.private_key_pem}"
+	    port = "2${count.index + 21}"
+      type = "ssh"
+      timeout = "4m"
+	    agent = false
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo docker exec `sudo docker ps | grep -i influx | awk '{print $1}'` influx -execute 'CREATE DATABASE cadvisor' || true"
     ]
   }
 }

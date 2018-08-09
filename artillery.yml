@@ -1,8 +1,8 @@
 config:
-  target: "http://localhost:5000"
+  target: "http://smcadams.eastus.cloudapp.azure.com"
   phases:
     -
-      duration: 20
+      duration: 60
       arrivalRate: 5
 scenarios:
   -

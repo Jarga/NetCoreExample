@@ -1,6 +1,6 @@
 variable "resource_group" {
   description = "The name of the resource group in which to create the virtual network."
-  default     = "New-Web-EastUS"
+  default     = "Test-Web-EastUS"
 }
 
 variable "rg_prefix" {
@@ -40,9 +40,14 @@ variable "subnet_prefix" {
   default     = "10.0.10.0/24"
 }
 
-variable "storage_account_type" {
-  description = "Defines the type of storage account to be created. Valid options are Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS. Changing this is sometimes valid - see the Azure documentation for more information on which types of accounts can be converted into other types."
-  default     = "Standard_LRS"
+variable "storage_machine_account_tier" {
+  description = "The Tier of the storage account in which your existing VHD and image reside (Standard or Premium)"
+  default     = "Standard"
+}
+
+variable "storage_machine_replication_type" {
+  description = "The Replication Type of the storage account in which your existing VHD and image reside (Options include LRS and GRS)"
+  default     = "LRS"
 }
 
 variable "vm_size" {
@@ -52,7 +57,7 @@ variable "vm_size" {
 
 variable "vm_count" {
   description = "number of VMs to create"
-  default = 5
+  default = 3
 }
 
 variable "image_publisher" {
@@ -67,7 +72,7 @@ variable "image_offer" {
 
 variable "image_sku" {
   description = "image sku to apply (az vm image list)"
-  default     = "16.04-LTS"
+  default     = "18.04-LTS"
 }
 
 variable "image_version" {

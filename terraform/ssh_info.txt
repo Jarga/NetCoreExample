@@ -1,9 +1,10 @@
-sftp -P 221 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no USER@LOADBALANCERDNS <<< $'put ./docker-compose.swarm.yml'
+sftp -P 221 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no smcadams@smcadams.eastus.cloudapp.azure.com <<< $'put ./docker-compose.swarm.yml'
 
-ssh USER@LOADBALANCERDNS -p 221 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+ssh smcadams@smcadams.eastus.cloudapp.azure.com -p 221 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
 
 docker stack deploy -c docker-compose.swarm.yml NETCOREEXAMPLE
 
+smcadams@smcadams.eastus.cloudapp.azure.com
 
 
-docker exec `docker ps | grep -i influx | awk '{print $1}'` influx -execute 'CREATE DATABASE cadvisor'
+Graphana DashBoard Id: 4637

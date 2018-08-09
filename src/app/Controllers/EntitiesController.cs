@@ -21,7 +21,7 @@ namespace NetCoreExample.Controllers
         public static string QueueName = Environment.GetEnvironmentVariable("QueueName") ?? "ExampleQueue";
         public static string MongoUri = Environment.GetEnvironmentVariable("MongoUri") ?? "mongodb://localhost:27017/example";
 
-        private readonly MessageBus _bus;
+        private static MessageBus _bus;
         private readonly EntityRepository _repo;
         private readonly ILogger _logger;
 
@@ -29,7 +29,10 @@ namespace NetCoreExample.Controllers
             try 
             {
                 //This is lazy~
-                _bus = new MessageBus(AMQPUrl);
+                lock(_bus)
+                {
+                    if(_bus == null) _bus = new MessageBus(AMQPUrl);
+                }
                 _repo = new EntityRepository(MongoUri);
             } 
             catch (Exception e) 
