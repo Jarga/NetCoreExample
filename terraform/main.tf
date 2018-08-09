@@ -25,6 +25,26 @@ resource "azurerm_resource_group" "rg" {
   location = "${var.location}"
 }
 
+resource "azurerm_network_security_group" "nsg" {
+  name                = "SecurityGroup-1"
+  location            = "${azurerm_resource_group.rg.location}"
+  resource_group_name = "${azurerm_resource_group.rg.name}"
+}
+
+resource "azurerm_network_security_rule" "secrule" {
+  name                        = "any"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = "${azurerm_resource_group.rg.name}"
+  network_security_group_name = "${azurerm_network_security_group.nsg.name}"
+}
+
 resource "azurerm_availability_set" "avset" {
   name                         = "${var.dns_name}avset"
   location                     = "${var.location}"
@@ -40,6 +60,7 @@ resource "azurerm_public_ip" "lbpip" {
   resource_group_name          = "${azurerm_resource_group.rg.name}"
   public_ip_address_allocation = "Static"
   domain_name_label            = "${var.lb_ip_dns_name}"
+  sku                          = "Standard"
 }
 
 resource "azurerm_virtual_network" "vnet" {
@@ -54,12 +75,14 @@ resource "azurerm_subnet" "subnet" {
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
   resource_group_name  = "${azurerm_resource_group.rg.name}"
   address_prefix       = "${var.subnet_prefix}"
+  network_security_group_id = "${azurerm_network_security_group.nsg.id}"
 }
 
 resource "azurerm_lb" "lb" {
   resource_group_name = "${azurerm_resource_group.rg.name}"
   name                = "${var.rg_prefix}lb"
   location            = "${var.location}"
+  sku                 = "Standard"
 
   frontend_ip_configuration {
     name                 = "LoadBalancerFrontEnd"
@@ -114,6 +137,7 @@ resource "azurerm_lb_probe" "lb_probe" {
 resource "azurerm_network_interface" "nic" {
   name                = "nic${count.index}"
   location            = "${var.location}"
+  network_security_group_id = "${azurerm_network_security_group.nsg.id}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
   count               = "${var.vm_count}"
 
@@ -187,7 +211,7 @@ resource "azurerm_virtual_machine" "vm" {
 
 resource "null_resource" "mount-shares" {
   count = "${var.vm_count}"
-  depends_on = ["azurerm_virtual_machine.vm"]
+  depends_on = ["azurerm_virtual_machine.vm", "azurerm_lb_nat_rule.tcp"]
   
   triggers {
     key = "${uuid()}"
@@ -210,8 +234,13 @@ resource "null_resource" "mount-shares" {
       "sudo apt-get -f -y install",
       "sudo apt-get -y upgrade",
       "sudo apt-get install cifs-utils",
-	  "sudo mkdir -p /mnt/swarmdata",
-	  "sudo mount -t cifs ${replace(azurerm_storage_share.share.url, "https:", "")} /mnt/swarmdata -o vers=3.0,user=${var.dns_name}stor,password=${azurerm_storage_account.stor.primary_access_key},dir_mode=0777,file_mode=0777,serverino || true"
+	    "sudo mkdir -p /mnt/swarmdata",
+	    "sudo mount -t cifs ${replace(azurerm_storage_share.share.url, "https:", "")} /mnt/swarmdata -o vers=3.0,user=${var.dns_name}stor,password=${azurerm_storage_account.stor.primary_access_key},dir_mode=0777,file_mode=0777,serverino || true",
+	    "sudo mkdir -p /mnt/swarmdata/grafana",
+      "sudo mkdir -p /mnt/swarmdata/prometheus",
+      "sudo mkdir -p /mnt/swarmdata/grafana/data",
+      "sudo mkdir -p /mnt/swarmdata/grafana/prometheus"
+
     ]
   }
 }
@@ -267,6 +296,7 @@ resource "null_resource" "configure-add-swarm-managers" {
   provisioner "remote-exec" {
     inline = [
       "command -v docker >/dev/null 2>&1 || sudo curl -sSL https://get.docker.com/ | sh",
+	  "sudo usermod -aG docker ${var.admin_username}",
 	  "echo sudo docker swarm join --token $(cat /mnt/swarmdata/managertoken) ${azurerm_network_interface.nic.0.private_ip_address}",
 	  "sudo docker swarm join --token $(cat /mnt/swarmdata/managertoken) ${azurerm_network_interface.nic.0.private_ip_address} || true"
     ]
@@ -294,6 +324,7 @@ resource "null_resource" "configure-swarm-agents" {
   provisioner "remote-exec" {
     inline = [
       "command -v docker >/dev/null 2>&1 || sudo curl -sSL https://get.docker.com/ | sh",
+	  "sudo usermod -aG docker ${var.admin_username}",
 	  "echo sudo docker swarm join --token $(cat /mnt/swarmdata/workertoken) ${azurerm_network_interface.nic.0.private_ip_address}",
 	  "sudo docker swarm join --token $(cat /mnt/swarmdata/workertoken) ${azurerm_network_interface.nic.0.private_ip_address} || true"
     ]
@@ -318,42 +349,17 @@ resource "null_resource" "run-system-containers" {
 	    agent = false
   }
 
-  # Copies the myapp.conf file to /etc/myapp.conf
+  # Copies all files over
   provisioner "file" {
-    source      = "grafana-compose.yml"
-    destination = "/tmp/grafana-compose.yml"
+    source      = "grafana/"
+    destination = "/mnt/swarmdata/grafana"
   }
 
   provisioner "remote-exec" {
     inline = [
       "sudo docker service create --name=viz --publish=8080:8080/tcp --constraint=node.role==manager --mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock dockersamples/visualizer || true",
 	    "sudo docker service create --name portainer --publish 9000:9000 --constraint 'node.role == manager' --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock portainer/portainer -H unix:///var/run/docker.sock || true",
-      "sudo docker stack deploy -c /tmp/grafana-compose.yml monitor || true"
-    ]
-  }
-}
-
-resource "null_resource" "create-cadvisor-db" {
-  count = 3
-  depends_on = ["null_resource.run-system-containers"]
-  
-  triggers {
-    key = "${uuid()}"
-  }
-  
-  connection {
-      host = "${azurerm_public_ip.lbpip.fqdn}"
-      user = "${var.admin_username}"
-	    private_key = "${tls_private_key.sshkey.private_key_pem}"
-	    port = "2${count.index + 21}"
-      type = "ssh"
-      timeout = "4m"
-	    agent = false
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo docker exec `sudo docker ps | grep -i influx | awk '{print $1}'` influx -execute 'CREATE DATABASE cadvisor' || true"
+      "sudo docker stack deploy -c /mnt/swarmdata/grafana/grafana-compose.yml monitor || true"
     ]
   }
 }

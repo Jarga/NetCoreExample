@@ -1,0 +1,64 @@
+version: '3.3'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.3.2
+    volumes:
+      - /mnt/swarmdata/grafana/prometheus/:/etc/prometheus/
+      - /mnt/swarmdata/prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    depends_on:
+      - cadvisor
+      - node-exporter
+    restart: always
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+  grafana:
+    image: grafana/grafana:5.2.2
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  node-exporter:
+    image: prom/node-exporter:v0.16.0
+    environment:
+      - NODE_ID={{.Node.ID}}
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /etc/hostname:/etc/nodename
+    command:
+      - '--path.sysfs=/host/sys'
+      - '--path.procfs=/host/proc'
+      - '--collector.textfile.directory=/etc/node-exporter/'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: always
+    deploy:
+      mode: global
+  cadvisor:
+    image: google/cadvisor:v0.28.5
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: always
+    deploy:
+      mode: global

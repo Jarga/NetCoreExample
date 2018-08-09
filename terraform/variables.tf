@@ -1,6 +1,6 @@
 variable "resource_group" {
   description = "The name of the resource group in which to create the virtual network."
-  default     = "Test-Web-EastUS"
+  default     = "New-Web-EastUS"
 }
 
 variable "rg_prefix" {
@@ -10,14 +10,17 @@ variable "rg_prefix" {
 
 variable "hostname" {
   description = "VM name referenced also in storage-related names."
+  default     = "smcadams"
 }
 
 variable "dns_name" {
   description = " Label for the Domain Name. Will be used to make up the FQDN. If a domain name label is specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system."
+  default     = "smcadams"
 }
 
 variable "lb_ip_dns_name" {
   description = "DNS for Load Balancer IP"
+  default     = "smcadams"
 }
 
 variable "location" {
@@ -52,7 +55,7 @@ variable "storage_machine_replication_type" {
 
 variable "vm_size" {
   description = "Specifies the size of the virtual machine."
-  default     = "Standard_A1"
+  default     = "Standard_D2_v3"
 }
 
 variable "vm_count" {
@@ -82,6 +85,7 @@ variable "image_version" {
 
 variable "admin_username" {
   description = "administrator user name"
+  default     = "smcadams"
 }
 
 variable "admin_password" {
@@ -91,5 +95,5 @@ variable "admin_password" {
 variable "lb_ports" {
   description = "Ports to expose in Load Balancer"
   type = "list"
-  default = [80, 3000, 8080, 9000, 15672, 27017]
+  default = [80, 3000, 8080, 9000, 9090]
 }

@@ -3,7 +3,7 @@ config:
   phases:
     -
       duration: 60
-      arrivalRate: 5
+      arrivalRate: 10
 scenarios:
   -
     name: "Create and Get"
