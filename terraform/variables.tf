@@ -88,8 +88,8 @@ variable "admin_username" {
   default     = "smcadams"
 }
 
-variable "admin_password" {
-  description = "administrator password (recommended to disable password auth)"
+variable "admin_password" { 
+  description = "administrator password (recommended to disable password auth)" 
 }
 
 variable "lb_ports" {
