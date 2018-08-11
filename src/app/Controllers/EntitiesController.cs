@@ -53,7 +53,7 @@ namespace NetCoreExample.Controllers
 
             Entity data = await _repo.Get(guid);
             
-            //This is awful, never do this, this is for demo purposes only.
+            //This is awful, never do this, this is for demo purposes only.....
             var watch = Stopwatch.StartNew();
             while(data == null && watch.ElapsedMilliseconds < timeout) {
                 Thread.Sleep(interval);
